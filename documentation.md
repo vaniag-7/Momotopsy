@@ -56,42 +56,76 @@ Run EasyOCR on an image and return detected text blocks. Uses `detail=0` to get 
 
 ---
 
+## llm_fixer.py — LLM-Powered Clause Analyzer
+
+Async service that sends predatory clauses to a Llama-3.3-70b model (via Groq) and returns structured analysis. ts is the brain that explains WHY a clause is predatory and rewrites it.
+
+### Module-Level Constants
+
+| Constant | Value | Description |
+|---|---|---|
+| `_LLM_MODEL` | `"llama-3.3-70b-versatile"` | Groq-hosted Llama-3 model |
+| `_SYSTEM_PROMPT` | *(see source)* | Instructs the LLM to return strict JSON with `reason_flagged`, `key_issues`, `improved_clause` |
+
+### `ClauseAnalysis` (Pydantic Model)
+
+Strict response schema enforced via Pydantic validation:
+
+| Field | Type | Description |
+|---|---|---|
+| `reason_flagged` | `str` | One-sentence explanation of why the clause is predatory |
+| `key_issues` | `list[str]` | 2-5 concise bullet points identifying specific legal issues |
+| `improved_clause` | `str` | Complete rewritten clause that is legally fair |
+
+### Class: `ClauseFixer`
+
+#### `__init__(model: str = _LLM_MODEL)`
+
+Creates an `AsyncGroq` client. Reads `GROQ_API_KEY` from environment variables.
+
+#### `async analyze_clause(text: str) -> dict[str, Any]`
+
+Sends a predatory clause to the LLM with JSON mode enforced (`response_format={"type": "json_object"}`). Validates the response with `ClauseAnalysis` Pydantic model. On any failure (network, parsing, LLM error), returns empty default fields instead of raising — graceful degradation frfr.
+
+---
+
 ## graph_engine.py — Graph Engine for Legal Clause Analysis
 
-Builds a similarity graph from clause embeddings and assigns mock risk scores. ts is where the math works basically.
+Builds a similarity graph from clause embeddings, assigns risk scores using the trained classifier, and triggers LLM analysis for predatory clauses. ts is where the math AND the AI work basically.
 
 ### Module-Level Constants
 
 | Constant | Value | Description |
 |---|---|---|
 | `_MODEL_NAME` | `"all-MiniLM-L6-v2"` | SentenceTransformers model used for embeddings |
+| `_CLF_PATH` | `"momotopsy_risk_model.pkl"` | Path to the trained classifier |
 | `_SIMILARITY_THRESHOLD` | `0.65` | Minimum cosine similarity to draw an edge between clauses |
+| `_RISK_THRESHOLD` | `0.25` | Minimum risk score to flag a clause as Predatory |
 
 ### Class: `LegalGraphBuilder`
 
-Builds a NetworkX graph of clause relationships using NLP embeddings. Lowkey the main character of the analysis pipeline.
+Builds a NetworkX graph of clause relationships using NLP embeddings, risk classification, and LLM-powered analysis. Lowkey the main character of the analysis pipeline.
 
 #### `__init__()`
 
-Loads the SentenceTransformers model into memory.
+Loads the SentenceTransformers encoder, the trained classifier (`momotopsy_risk_model.pkl`), and creates a `ClauseFixer` instance.
 
-#### `build_graph(clauses: list[str]) -> dict[str, Any]`
+#### `async build_graph(clauses: list[str]) -> dict[str, Any]`
 
-Constructs a clause-similarity graph and returns it as a JSON-ready dict.
+Constructs a clause-similarity graph with LLM analysis and returns it as a JSON-ready dict.
 
 **Pipeline:**
-1. Encode clauses into dense vectors.
-2. Create a node per clause.
-3. Add edges where `cosine_similarity > threshold`.
-4. Assign deterministic mock risk scores.
+1. Encode clauses into 384-dim dense vectors.
+2. Predict risk scores using `clf.predict_proba()`.
+3. Create a node per clause with `label` (Safe/Predatory based on `_RISK_THRESHOLD`).
+4. For Safe nodes: set `reason_flagged=None`, `key_issues=[]`, `improved_clause=None`.
+5. For Predatory nodes: fire all LLM calls in parallel via `asyncio.gather()`.
+6. Append LLM results (`reason_flagged`, `key_issues`, `improved_clause`) to node attributes.
+7. Add edges where `cosine_similarity > threshold`.
 
 - **Args:**
   - `clauses` — List of clause text strings.
-- **Returns:** JSON-serializable dict produced by `nx.node_link_data()`.
-
-#### `_mock_risk_score(clause: str) -> float`
-
-Generates a deterministic pseudo-random risk score in `[0, 1]`. Uses a SHA-256 content hash so the same clause always receives the same score — reproducible across runs cuz naur we do not want RNG shi.
+- **Returns:** JSON-serializable dict produced by `nx.node_link_data()`. Each node includes `text`, `risk_score`, `label`, `reason_flagged`, `key_issues`, and `improved_clause`.
 
 ---
 
@@ -127,7 +161,7 @@ When run directly (`python main.py`), starts Uvicorn on `0.0.0.0:8000` with hot-
 
 ## train_model.py — Momotopsy Risk Model Trainer
 
-Trains a RandomForest classifier on legal clause embeddings to detect predatory contract language. Highkey the most important script in the repo.
+Trains a HistGradientBoostingClassifier on legal clause embeddings to detect predatory contract language. Highkey the most important script in the repo.
 
 ### Data Sources
 
@@ -135,8 +169,21 @@ Trains a RandomForest classifier on legal clause embeddings to detect predatory 
 |---|---|---|---|
 | `lex_glue/unfair_tos` | All splits (train+val+test) | ~9,414 | Predatory if `len(labels) > 0` |
 | `nguha/legalbench` `unfair_tos` | Test split | ~3,813 | Predatory if `answer != "Other"` |
+| `joelniklaus/online_terms_of_service` | All splits (EN only) | ~6,000+ | Predatory if any unfairness flag is True |
+| Hand-crafted domain examples | Inline (5x weighted) | ~135 unique | Curated binary labels across employment, rental, IP, consumer domains |
 
-After deduplication: **~13,045 unique clauses**.
+After deduplication: **~19,400 unique clauses**.
+
+### Hand-Crafted Examples
+
+The HF datasets are 100% Terms of Service. Real contracts span employment, rental, IP, and consumer law — the hand-crafted examples fill this domain gap. Each predatory example is paired with safe counterparts for balanced signals. Categories include:
+
+- **Employment**: IP assignment overreach, non-compete overreach, overtime waiver, at-will termination abuse
+- **Rental/Lease**: asset seizure, unreasonable entry rights, security deposit forfeiture, habitability waivers
+- **IP/Licensing**: irrevocable perpetual licenses, derivative work claims, permanent content transfers
+- **Consumer**: class-action waivers, unilateral term changes, blanket liability waivers, refund waivers
+
+Examples are duplicated 5x (`_HANDCRAFTED_WEIGHT`) so they don't get drowned out by the ~19k HF samples.
 
 ### Module-Level Constants
 
@@ -146,6 +193,8 @@ After deduplication: **~13,045 unique clauses**.
 | `_EXPORT_PATH` | `"momotopsy_risk_model.pkl"` | Output path for the trained model |
 | `_TEST_SIZE` | `0.20` | Test split ratio |
 | `_RANDOM_STATE` | `42` | Random seed for reproducibility |
+| `_UNFAIR_FLAGS` | `["a", "ch", "cr", ...]` | Unfairness topic flags for online_terms_of_service dataset |
+| `_HANDCRAFTED_WEIGHT` | `5` | Multiplier for hand-crafted example repetition |
 
 ### `_load_lex_glue() -> pd.DataFrame`
 
@@ -155,25 +204,33 @@ Downloads all splits of `lex_glue/unfair_tos`, concatenates them, and creates th
 
 Downloads `nguha/legalbench` unfair_tos test split. Maps `answer` column to binary — anything that isn't "Other" is predatory.
 
+### `_load_online_tos() -> pd.DataFrame`
+
+Downloads all splits of `joelniklaus/online_terms_of_service`, filters to English clauses only, and marks any clause with at least one unfairness flag as predatory.
+
+### `_load_handcrafted() -> pd.DataFrame`
+
+Loads the inline hand-crafted domain examples and duplicates them by the weight factor.
+
 ### `main()`
 
 End-to-end training pipeline:
 
-1. **Data Ingestion** — Loads both datasets, combines into a single DataFrame, deduplicates on `text`.
+1. **Data Ingestion** — Loads all four datasets, combines into a single DataFrame, deduplicates on `text`.
 2. **Semantic Embedding** — Loads `all-MiniLM-L6-v2`, encodes the `text` column into a 384-dim embedding matrix (`X`). `is_predatory` becomes the target `y`.
-3. **SMOTE Oversampling** — Applies SMOTE on the training split to balance the classes (cuz the dataset is ~89% Safe / 11% Predatory).
-4. **Model Training** — 80/20 stratified split. Trains `RandomForestClassifier(n_estimators=200, class_weight="balanced")`.
+3. **SMOTETomek Resampling** — Applies SMOTE + Tomek Links on the training split. SMOTE oversamples the minority class, Tomek Links removes ambiguous majority samples near the decision boundary.
+4. **Model Training** — 80/20 stratified split. Trains `HistGradientBoostingClassifier(max_iter=500, learning_rate=0.05, max_depth=6, min_samples_leaf=10, class_weight="balanced")`.
 5. **Evaluation & Export** — Prints `accuracy_score` and `classification_report`. Exports model via `joblib.dump()`.
 
-### Training Results (v4)
+### Training Results (v5)
 
 | Metric | Safe | Predatory |
 |---|---|---|
-| Precision | 0.96 | 0.94 |
-| Recall | 1.00 | 0.62 |
-| F1-Score | 0.98 | 0.75 |
+| Precision | 0.97 | 0.78 |
+| Recall | 0.97 | 0.76 |
+| F1-Score | 0.97 | 0.77 |
 
-**Overall accuracy: 95.6%** on 2,609 test samples.
+**Overall accuracy: 95.1%** on 3,883 test samples.
 
 ---
 

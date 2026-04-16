@@ -60,7 +60,7 @@ def main() -> None:
     total = len(predictions)
     flagged = int(np.sum(predictions))
     safe = total - flagged
-    print(f"\nSummary: {total} clauses analyzed — {flagged} flagged, {safe} safe\n")
+    print(f"\nSummary: {total} clauses analyzed - {flagged} flagged, {safe} safe\n")
 
 
 if __name__ == "__main__":

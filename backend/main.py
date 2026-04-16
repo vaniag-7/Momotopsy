@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).with_name(".env"))
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -68,7 +73,7 @@ async def analyze_contract(file: UploadFile = File(...)) -> dict[str, Any]:
             detail="No text could be extracted from the uploaded file.",
         )
 
-    graph_data: dict[str, Any] = graph_builder.build_graph(clauses)
+    graph_data: dict[str, Any] = await graph_builder.build_graph(clauses)
 
     return {
         "filename": file.filename,
