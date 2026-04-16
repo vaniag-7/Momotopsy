@@ -1,16 +1,25 @@
-# React + Vite
+# Momotopsy — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the React-based frontend for Momotopsy, a legal contract analysis tool. It provides a highly interactive and visual interface for reviewing document risks.
 
-Currently, two official plugins are available:
+## Key Features
+- **3D Document Visualization**: Uses D3.js and React-Force-Graph to visualize legal contracts as semantic networks of clauses.
+- **Real-Time Risk Scoring**: Displays concrete risk percentages and predatory labeling for every section of the contract.
+- **AI Sidebar**: Interactive analysis panel that explains predatory clauses and provides GPT-powered rewrites.
+- **OCR-Ready Upload**: Seamless drag-and-drop ingestion for PDFs, Word files, and images.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Architecture
+- **Framework**: React 18 + Vite
+- **Styling**: Vanilla CSS (Tailwind-compatible)
+- **Data Visualization**: D3.js, NetworkX-compat (Node-Link format)
+- **State Management**: React Context & Hooks
 
-## React Compiler
+## Tech Stack
+- **API Communication**: Axios (consuming the FastAPI `/analyze` endpoint)
+- **Icons**: Lucide React
+- **Animations**: Framer Motion
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting Started
+1. Install dependencies: `npm install`
+2. Run development server: `npm run dev`
+3. Ensure the backend is running on `localhost:8000` to enable full analysis features.

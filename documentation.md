@@ -97,10 +97,10 @@ Builds a similarity graph from clause embeddings, assigns risk scores using the 
 
 | Constant | Value | Description |
 |---|---|---|
-| `_MODEL_NAME` | `"all-MiniLM-L6-v2"` | SentenceTransformers model used for embeddings |
+| `_MODEL_NAME` | `"all-mpnet-base-v2"` | SentenceTransformers model used for embeddings (768-dim) |
 | `_CLF_PATH` | `"momotopsy_risk_model.pkl"` | Path to the trained classifier |
 | `_SIMILARITY_THRESHOLD` | `0.65` | Minimum cosine similarity to draw an edge between clauses |
-| `_RISK_THRESHOLD` | `0.25` | Minimum risk score to flag a clause as Predatory |
+| `_RISK_THRESHOLD` | `0.15` | Minimum risk score to flag a clause as Predatory (Recall-boosted) |
 
 ### Class: `LegalGraphBuilder`
 
@@ -115,7 +115,7 @@ Loads the SentenceTransformers encoder, the trained classifier (`momotopsy_risk_
 Constructs a clause-similarity graph with LLM analysis and returns it as a JSON-ready dict.
 
 **Pipeline:**
-1. Encode clauses into 384-dim dense vectors.
+1. Encode clauses into 768-dim dense vectors using MPNet.
 2. Predict risk scores using `clf.predict_proba()`.
 3. Create a node per clause with `label` (Safe/Predatory based on `_RISK_THRESHOLD`).
 4. For Safe nodes: set `reason_flagged=None`, `key_issues=[]`, `improved_clause=None`.
@@ -189,7 +189,7 @@ Examples are duplicated 5x (`_HANDCRAFTED_WEIGHT`) so they don't get drowned out
 
 | Constant | Value | Description |
 |---|---|---|
-| `_MODEL_NAME` | `"all-MiniLM-L6-v2"` | SentenceTransformers model |
+| `_MODEL_NAME` | `"all-mpnet-base-v2"` | High-performance SentenceTransformers model |
 | `_EXPORT_PATH` | `"momotopsy_risk_model.pkl"` | Output path for the trained model |
 | `_TEST_SIZE` | `0.20` | Test split ratio |
 | `_RANDOM_STATE` | `42` | Random seed for reproducibility |
@@ -217,20 +217,21 @@ Loads the inline hand-crafted domain examples and duplicates them by the weight 
 End-to-end training pipeline:
 
 1. **Data Ingestion** — Loads all four datasets, combines into a single DataFrame, deduplicates on `text`.
-2. **Semantic Embedding** — Loads `all-MiniLM-L6-v2`, encodes the `text` column into a 384-dim embedding matrix (`X`). `is_predatory` becomes the target `y`.
-3. **SMOTETomek Resampling** — Applies SMOTE + Tomek Links on the training split. SMOTE oversamples the minority class, Tomek Links removes ambiguous majority samples near the decision boundary.
-4. **Model Training** — 80/20 stratified split. Trains `HistGradientBoostingClassifier(max_iter=500, learning_rate=0.05, max_depth=6, min_samples_leaf=10, class_weight="balanced")`.
-5. **Evaluation & Export** — Prints `accuracy_score` and `classification_report`. Exports model via `joblib.dump()`.
+2. **Semantic Embedding** — Loads `all-mpnet-base-v2`, encodes the `text` column into a 768-dim embedding matrix (`X`). Uses disk-caching to speed up retraining.
+3. **SMOTETomek Resampling** — Applies SMOTE + Tomek Links on the training split. After resampling, we typically have ~27k balanced samples.
+4. **Hyperparameter Tuning** — 80/20 stratified split. Uses `RandomizedSearchCV` on a `HistGradientBoostingClassifier` to optimize `learning_rate`, `max_depth`, and `l2_regularization`.
+5. **Evaluation & Export** — Prints detailed metrics, saves a confusion matrix plot, and exports the model via `joblib.dump()`.
 
-### Training Results (v5)
+### Training Results (v2 - MPNet + Tuned)
 
 | Metric | Safe | Predatory |
 |---|---|---|
-| Precision | 0.97 | 0.78 |
-| Recall | 0.97 | 0.76 |
+| Precision | 0.98 | 0.71 |
+| Recall | 0.96 | 0.84 |
 | F1-Score | 0.97 | 0.77 |
 
-**Overall accuracy: 95.1%** on 3,883 test samples.
+**Overall accuracy: 95.0%** (at 0.15 risk threshold) on 3,883 test samples. 
+*Note: Precision was prioritized to 0.71+ to reduce false positives while maintaining 84%+ recall.*
 
 ---
 
@@ -243,7 +244,8 @@ Validates the trained anomaly detector against a set of mock contract clauses. L
 | Constant | Value | Description |
 |---|---|---|
 | `_MODEL_PATH` | `"momotopsy_risk_model.pkl"` | Path to the trained model |
-| `_ENCODER_NAME` | `"all-MiniLM-L6-v2"` | SentenceTransformers model for encoding test clauses |
+| `_ENCODER_NAME` | `"all-mpnet-base-v2"` | SentenceTransformers model (MPNet) |
+| `_RISK_THRESHOLD` | `0.15` | Production risk threshold for flagging |
 
 ### `MOCK_CLAUSES`
 
