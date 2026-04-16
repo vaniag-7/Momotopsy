@@ -1,0 +1,57 @@
+:root {
+  --bg-color: #f6f4ed;
+  --text-primary: #383526;
+  --text-secondary: #5e5948;
+  --border-light: #b4a991;
+  --button-hover: #ebe5d3;
+  --danger: #9c2727;
+  --warning: #d19a2e;
+  --success: #357a38;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Playfair Display', serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Wavy Ornaments - Replicating the hand-drawn corner pieces across the app using the exact extracted PNGs */
+.decorator-top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 400px;
+  background-image: url("/src/assets/shape_top_right.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top right;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.decorator-bottom-left {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 400px;
+  height: 400px;
+  background-image: url("/src/assets/shape_bottom_left.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  z-index: 0;
+  pointer-events: none;
+}
+

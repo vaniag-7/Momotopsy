@@ -39,6 +39,10 @@ class LegalGraphBuilder:
 
         # Build nodes
         graph = nx.Graph()
+        
+        avg_risk = float(np.mean(risk_scores)) if len(risk_scores) > 0 else 0.0
+        graph.graph["document_risk_score"] = round(avg_risk, 4)
+        
         llm_tasks: list = []
         predatory_indices: list[int] = []
 

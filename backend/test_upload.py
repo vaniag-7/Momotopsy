@@ -25,6 +25,7 @@ def test_api(file_path):
             data = response.json()
             print(f"Filename: {data.get('filename')}")
             print(f"Total Clauses Extracted: {data.get('total_clauses')}")
+            print(f"Document Risk Score: {data.get('document_risk_score')}")
             
             print("\nNodes:")
             for node in data.get('graph', {}).get('nodes', []):

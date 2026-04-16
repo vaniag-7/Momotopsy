@@ -78,6 +78,7 @@ async def analyze_contract(file: UploadFile = File(...)) -> dict[str, Any]:
     return {
         "filename": file.filename,
         "total_clauses": len(clauses),
+        "document_risk_score": graph_data.get("graph", {}).get("document_risk_score", 0.0),
         "graph": graph_data,
     }
 
