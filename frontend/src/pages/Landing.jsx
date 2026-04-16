@@ -17,21 +17,21 @@ export default function Landing() {
       <div className="deco-shape deco-cross" style={{ top: '38vh', left: '42vw' }}></div>
       <div className="deco-shape deco-cross" style={{ bottom: '45vh', right: '10vw', transform: 'scale(1.5)' }}></div>
       <div className="deco-shape deco-dot" style={{ top: '25vh', right: '22vw' }}></div>
-      <div className="deco-shape deco-dot" style={{ bottom: '30vh', left: '20vw' }}></div>*/}
+      <div className="deco-shape deco-dot" style={{ bottom: '30vh', left: '20vw' }}></div>
       
       <div style={{ position: 'absolute', top: '40px', right: '40px', zIndex: 10 }}>
         <button
           onClick={() => navigate('/login')}
           className="action-btn"
           style={{ padding: '10px 40px', borderRadius: '30px', border: '1px solid var(--border-light)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}
-        >
+      
           LOGIN
         </button>
-      </div>
+      </div> */}
 
       <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', flex: '1 1 0%', padding: '0 clamp(20px, 10vw, 150px)', zIndex: 2 }}>
         <h1 style={{ position: 'relative', fontSize: 'clamp(3.5rem, 10vw, 9rem)', fontWeight: 'normal', margin: '0px 0px 10px', letterSpacing: '2px', fontFamily: '"Migra", "Cinzel", serif', textShadow: '0 4px 20px rgba(56, 53, 38, 0.1)', lineHeight: 1 }}>
-          <div className="deco-shape deco-square" style={{ width: '0.9em', height: '0.9em', top: '-10%', left: '-3%', zIndex: -1 }}></div>
+          {/*<div className="deco-shape deco-square" style={{ width: '0.9em', height: '0.9em', top: '-10%', left: '-3%', zIndex: -1 }}></div> */}
           MOMOTOPSY
         </h1>
         <div style={{ maxWidth: '600px' }}>
@@ -41,6 +41,13 @@ export default function Landing() {
           <p style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: 'var(--text-secondary)', lineHeight: '1.6', opacity: 0.85 }}>
             Automated legal contract analysis. Discover hidden predatory clauses, understand interconnected risk networks, and obtain plain-language explanations before you sign.
           </p>
+          <button
+            onClick={() => navigate('/login')}
+            className="action-btn"
+            style={{ marginTop: '20px', padding: '12px 30px', borderRadius: '30px', border: '1px solid var(--border-light)', background: 'var(--accent)', color: 'var(--text-primary)', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.1rem' }}
+          >
+            Get Started
+          </button>
         </div>
       </div>
 
@@ -52,8 +59,10 @@ export default function Landing() {
       />
 
       <div className="glass-panel" style={{ padding: 'clamp(30px, 5vw, 50px) clamp(20px, 10vw, 150px)', borderTop: '1px solid var(--border-light)', zIndex: 2 }}>
-        <p style={{ lineHeight: '1.6', fontSize: 'clamp(1rem, 2vw, 1.3rem)', margin: '0', maxWidth: '45em', color: 'var(--text-secondary)' }}>
-          Today, legal agreements are complex, expensive to review, and easy to misuse. Most people accept terms without fully understanding the risks involved. We saw this gap and set out to solve it using technology. Our platform breaks contracts into individual clauses and analyzes each one. It maps how clauses connect, revealing hidden patterns and risk networks. We flag dangerous terms, explain them in simple language, and suggest safer alternatives. This goes beyond summaries—it shows how a contract actually works. Our goal is to make legal understanding accessible to everyone.<br /><br />
+        <p style={{ lineHeight: '1.6', fontSize: 'clamp(1rem, 2vw, 1.7rem)', margin: '0', maxWidth: '45em', color: 'var(--text-secondary)' }}>
+          Today, legal agreements are complex, expensive to review, and easy to misuse. Most people accept terms without fully understanding the risks involved.
+
+           Our goal is to make legal understanding accessible to everyone.<br /><br />
           Because signing should feel like a choice, not a trap.
         </p>
       </div>

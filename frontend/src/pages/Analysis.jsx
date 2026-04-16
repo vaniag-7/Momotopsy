@@ -153,6 +153,22 @@ export default function Analysis() {
             </div>
           </div>
         )}
+        {activeTab === 'clauses' && (
+          <div style={{ display: 'flex', gap: '30px', textAlign: 'center' }}>
+            <div>
+              <div style={{ width: '30px', height: '30px', borderRadius: '5px', backgroundColor: 'var(--danger)', margin: '0 auto', boxShadow: '0 0 10px rgba(156, 39, 39, 0.4)' }}></div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--danger)', marginTop: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>SEVERE<br/>RISK</div>
+            </div>
+            <div>
+              <div style={{ width: '30px', height: '30px', borderRadius: '5px', backgroundColor: 'var(--warning)', margin: '0 auto', boxShadow: '0 0 10px rgba(209, 154, 46, 0.4)' }}></div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--warning)', marginTop: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>MODERATE<br/>RISK</div>
+            </div>
+            <div>
+              <div style={{ width: '30px', height: '30px', borderRadius: '5px', backgroundColor: 'var(--success)', margin: '0 auto', boxShadow: '0 0 10px rgba(53, 122, 56, 0.4)' }}></div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--success)', marginTop: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>LOW<br/>RISK</div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ zIndex: 2, position: 'relative' }}>
