@@ -28,7 +28,7 @@ _ocr_reader: easyocr.Reader | None = None
 def _get_ocr_reader() -> easyocr.Reader:
     global _ocr_reader
     if _ocr_reader is None:
-        _ocr_reader = easyocr.Reader(["en"], gpu=False)
+        _ocr_reader = easyocr.Reader(["en"], gpu=True)
     return _ocr_reader
 
 
@@ -75,10 +75,13 @@ class DocumentIngester:
                     # Run OCR on the extracted image bytes
                     reader = _get_ocr_reader()
                     results = reader.readtext(image_bytes, detail=0)
-                    for line in results:
-                        text = _normalize(line)
-                        if text:
-                            clauses.append(text)
+                    if results:
+                        joined_text = " ".join(results)
+                        # Split by period/punctuation to form semantic clauses instead of blind lines
+                        for sentence in re.split(r'(?<=[.!?])\s+', joined_text):
+                            text = _normalize(sentence)
+                            if len(text) > 15:  # Ignore tiny fragments
+                                clauses.append(text)
                             
         return clauses
 
@@ -88,7 +91,7 @@ class DocumentIngester:
         clauses: list[str] = []
         for para in doc.paragraphs:
             text = _normalize(para.text)
-            if text:
+            if len(text) > 15:
                 clauses.append(text)
         return clauses
 
@@ -97,8 +100,10 @@ class DocumentIngester:
         reader = _get_ocr_reader()
         results = reader.readtext(data, detail=0)
         clauses: list[str] = []
-        for line in results:
-            text = _normalize(line)
-            if text:
-                clauses.append(text)
+        if results:
+            joined_text = " ".join(results)
+            for sentence in re.split(r'(?<=[.!?])\s+', joined_text):
+                text = _normalize(sentence)
+                if len(text) > 15:
+                    clauses.append(text)
         return clauses

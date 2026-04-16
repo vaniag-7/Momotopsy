@@ -12,12 +12,17 @@ def test_api(file_path):
         pdf_bytes = f.read()
     filename = os.path.basename(file_path)
 
+    import mimetypes
+    mime_type, _ = mimetypes.guess_type(file_path)
+    if not mime_type:
+        mime_type = "application/octet-stream"
+
     print("Sending to Momotopsy API...")
     try:
         response = httpx.post(
             API_URL,
-            files={"file": (filename, pdf_bytes, "application/pdf")},
-            timeout=120.0
+            files={"file": (filename, pdf_bytes, mime_type)},
+            timeout=None  # Disabled timeout because CPU-based OCR is heavily dependent on document size
         )
         
         if response.status_code == 200:
@@ -52,12 +57,13 @@ if __name__ == "__main__":
             print(f"Please place some sample PDFs in '{TEST_DIR}' and run again.")
             sys.exit(0)
             
-        pdf_files = [f for f in os.listdir(TEST_DIR) if f.lower().endswith(".pdf")]
+        supported_exts = {".pdf", ".docx", ".png", ".jpg", ".jpeg"}
+        test_files = [f for f in os.listdir(TEST_DIR) if os.path.splitext(f)[1].lower() in supported_exts]
         
-        if not pdf_files:
-            print(f"No PDF files found in '{TEST_DIR}'. Please download some sample PDFs into this folder.")
+        if not test_files:
+            print(f"No supported files found in '{TEST_DIR}'. Please download sample PDFs or DOCXs into this folder.")
             sys.exit(0)
             
-        print(f"Found {len(pdf_files)} PDF(s) in '{TEST_DIR}'. Starting batch tests...")
-        for pdf in pdf_files:
-            test_api(os.path.join(TEST_DIR, pdf))
+        print(f"Found {len(test_files)} file(s) in '{TEST_DIR}'. Starting batch tests...")
+        for f in test_files:
+            test_api(os.path.join(TEST_DIR, f))
