@@ -57,7 +57,7 @@ def start_scheduler():
     
     if demo_mode:
         print("\n\n[WARNING]: MULTIPLIER ACTIVE! (DEMO_MODE=True)")
-        print("SCHEDULER FIRING EVERY 30 SECONDS... IGNORING ALL SENT FLAGS.\n")
+        print("SCHEDULER FIRING EVERY 2 DAYS... IGNORING ALL SENT FLAGS.\n")
         # Blast repeated notifications for live tech demos
         scheduler.add_job(check_upcoming_deadlines, IntervalTrigger(days=2), id="lifecycle_job", replace_existing=True)
     else:

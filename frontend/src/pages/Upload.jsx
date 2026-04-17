@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import momoBasket from '../assets/momo_basket.png';
-import largeMomo from '../assets/large_momo.png';
 
 export default function Upload() {
   const navigate = useNavigate();
@@ -62,20 +60,17 @@ export default function Upload() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      
-      <div className="deco-circle deco-1"></div>
-      <div className="deco-circle deco-2"></div>
-      
-      <div style={{ position: 'absolute', top: '40px', left: '40px', fontSize: 'clamp(1.5rem, 5vw, 2rem)', letterSpacing: '2px', zIndex: 10 }}>
+    <div className="living-bg" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+
+      <div style={{ position: 'absolute', top: '40px', left: '40px', fontSize: '2.2rem', letterSpacing: '4px', zIndex: 10 }}>
         MOMOTOPSY
       </div>
 
-      <div style={{ textAlign: 'center', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        
+      <div style={{ textAlign: 'center', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '800px', width: '90%' }}>
+
         {isAnalyzing ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '350px', position: 'relative' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 'normal', marginBottom: '40px', letterSpacing: '1px' }}>Executing semantic extraction & clause autopsy...</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '350px', position: 'relative', width: '100%', maxWidth: '800px' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 'normal', marginBottom: '40px' }}>Clause Autopsy in Progress...</h2>
             
             <div style={{ position: 'relative', width: '250px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: '30px' }}>
               
@@ -88,12 +83,12 @@ export default function Upload() {
               </div>
 
               {/* Faceless Momo */}
-              <div className="momo-body" style={{ position: 'absolute', bottom: '5px', width: '130px', height: '100px', background: 'var(--login-bg-color)', borderRadius: '60px 60px 15px 15px', boxShadow: 'inset -8px -8px 20px rgba(180, 169, 145, 0.4), 0 8px 15px rgba(56, 53, 38, 0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+              <div className="momo-body" style={{ position: 'absolute', bottom: '5px', width: '130px', height: '100px', background: 'var(--accent-gold)', borderRadius: '60px 60px 15px 15px', boxShadow: 'inset -8px -8px 20px rgba(180, 169, 145, 0.4), 0 8px 15px rgba(56, 53, 38, 0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
                 
                 {/* Wavy base */}
                 <div style={{ position: 'absolute', bottom: '-6px', display: 'flex', justifyContent: 'space-evenly', width: '100%', padding: '0 5px' }}>
                    {[...Array(6)].map((_, i) => (
-                     <div key={i} style={{ width: '18px', height: '18px', background: 'var(--login-bg-color)', borderRadius: '50%', boxShadow: '0 2px 5px rgba(56,53,38,0.1)' }}></div>
+                     <div key={i} style={{ width: '18px', height: '18px', background: 'var(--accent-gold)', borderRadius: '50%', boxShadow: '0 2px 5px rgba(56,53,38,0.1)' }}></div>
                    ))}
                 </div>
 
@@ -114,73 +109,64 @@ export default function Upload() {
           </div>
         ) : (
           <>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 'normal', marginBottom: '10px' }}>Commence Document Analysis</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '40px', letterSpacing: '1px', opacity: 0.9 }}>Secure ingestion via Momotopsy core pipeline</p>
+            <h2 style={{ fontSize: '3.5rem', fontWeight: 'normal', marginBottom: '10px' }}>Commence Analysis</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '50px', fontSize: '1.2rem' }}>Secure ingestion via Momotopsy core pipeline</p>
 
-            <div 
+            <div
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
               onDrop={onDrop}
-              className="fade-in"
+              className="glass-panel fade-in-up"
               style={{
                 width: '100%',
-                maxWidth: '600px',
-                height: 'clamp(200px, 30vh, 250px)',
-                border: `3px dashed ${isDragging ? 'var(--text-primary)' : 'var(--text-secondary)'}`,
+                height: '300px',
+                border: `2px dashed ${isDragging ? 'var(--accent-gold)' : 'var(--border-light)'}`,
                 borderRadius: '40px',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: isDragging ? 'rgba(235, 228, 213, 0.8)' : 'rgba(252, 251, 250, 0.4)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                boxShadow: isDragging ? '0 10px 30px rgba(56, 53, 38, 0.15)' : '0 4px 15px rgba(56, 53, 38, 0.05)',
-                transition: 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)',
-                marginBottom: '20px',
+                background: isDragging ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.4)',
                 cursor: 'pointer',
-                position: 'relative',
-                transform: isDragging ? 'scale(1.02)' : 'scale(1)'
+                transition: 'all 0.4s ease'
               }}
               onClick={() => document.getElementById('file-input').click()}
             >
-              <input 
-                type="file" 
-                id="file-input" 
-                style={{ display: 'none' }} 
+              <input
+                type="file"
+                id="file-input"
+                style={{ display: 'none' }}
                 onChange={handleFileChange}
                 accept=".pdf,.png,.jpg,.jpeg,.docx"
               />
-              <span style={{ fontSize: '1.2rem', color: file ? 'var(--text-primary)' : '#9c9586' }}>
-                {file ? file.name : 'Drag & Drop your contract here'}
+              <div style={{ fontSize: '4rem', marginBottom: '20px', opacity: 0.5 }}>📄</div>
+              <span style={{ fontSize: '1.4rem', color: file ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                {file ? file.name : 'Drag & Drop Contract'}
               </span>
+              {!file && <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>or click to browse your files</p>}
             </div>
 
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '30px', opacity: 0.8 }}>
-              Supported forensics: .PDF / .JPG / .DOCX / .PNG <br/> <span style={{ fontSize: '0.9rem' }}>End-to-End Encrypted Processing</span>
-            </p>
+            <div style={{ marginTop: '40px', textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontSize: '0.9rem', letterSpacing: '1px' }}>
+                SUPPORTED: PDF, PNG, JPG, DOCX | END-TO-END ENCRYPTED
+              </p>
 
-            {error && <p style={{ color: 'var(--danger)', marginBottom: '20px' }}>{error}</p>}
+              {error && <p style={{ color: 'var(--danger)', marginBottom: '20px' }}>{error}</p>}
 
-            <button 
-              onClick={handleStart}
-              className="action-btn"
-              style={{
-                padding: '12px 30px',
-                borderRadius: '30px',
-                border: '1px solid var(--border-light)',
-                background: 'transparent',
-                color: 'var(--text-primary)',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                letterSpacing: '2px'
-              }}
-            >
-              INITIATE AUTOPSY
-            </button>
+              <button
+                onClick={handleStart}
+                className="modern-btn primary"
+                style={{ padding: '18px 60px', fontSize: '1.1rem' }}
+              >
+                INITIATE AUTOPSY
+              </button>
+            </div>
           </>
         )}
       </div>
+
+      <div className="decorator-top-right" style={{ opacity: 0.3 }}></div>
+      <div className="decorator-bottom-left" style={{ opacity: 0.1 }}></div>
     </div>
   );
 }
